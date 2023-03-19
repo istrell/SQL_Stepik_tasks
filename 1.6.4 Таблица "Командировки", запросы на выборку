@@ -1,0 +1,5 @@
+SELECT name, city, date_first, date_last
+FROM trip
+WHERE DATEDIFF(date_first, date_last) IN 
+(SELECT MAX(DATEDIFF(date_first, date_last)) from trip)
+;
