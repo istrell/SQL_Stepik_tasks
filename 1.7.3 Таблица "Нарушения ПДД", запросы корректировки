@@ -1,0 +1,44 @@
+/* Задание
+
+В таблице fine увеличить в два раза сумму неоплаченных штрафов для отобранных на предыдущем шаге записей. 
+*/
+
+
+CREATE TABLE query_in(
+SELECT name, number_plate, violation
+FROM fine
+GROUP BY name, number_plate, violation
+HAVING count(*) >= 2);
+
+SELECT * FROM query_in;
+
+UPDATE fine, query_in
+SET sum_fine= sum_fine * 2
+WHERE fine.name =query_in.name AND fine.number_plate = query_in.number_plate AND fine.date_payment IS NULL;
+
+SELECT * FROM fine;
+
+/*Необходимо:
+
+в таблицу fine занести дату оплаты соответствующего штрафа из таблицы payment; 
+уменьшить начисленный штраф в таблице fine в два раза  (только для тех штрафов, информация о которых занесена в таблицу payment) , если оплата произведена не позднее 20 дней со дня нарушения.
+*/
+
+
+UPDATE fine, payment
+SET fine.date_payment = payment.date_payment 
+, sum_fine = IF (DATEDIFF( fine.date_payment,fine.date_violation)<=20,sum_fine/2,sum_fine)
+WHERE fine.name=payment.name AND fine.number_plate =payment.number_plate AND fine.violation=payment.violation AND fine.date_payment IS NULL;
+
+SELECT * FROM fine;
+/* Задание
+
+Создать новую таблицу back_payment, куда внести информацию о неоплаченных штрафах (Фамилию и инициалы водителя, номер машины, нарушение, сумму штрафа  и  дату нарушения) из таблицы fine. */
+
+CREATE TABLE back_payment
+(SELECT name,number_plate,violation,sum_fine,date_violation 
+ FROM fine
+ WHERE date_payment IS NULL)
+ ;
+
+SELECT * FROM back_payment;
